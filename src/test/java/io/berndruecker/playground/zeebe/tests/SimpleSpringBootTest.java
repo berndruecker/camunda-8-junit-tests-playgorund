@@ -1,6 +1,7 @@
 package io.berndruecker.playground.zeebe.tests;
 
 import io.berndruecker.playground.zeebe.tests.springboot.ZeebeSpringAssertions;
+import io.camunda.zeebe.bpmnassert.testengine.InMemoryEngine;
 import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
 import io.camunda.zeebe.model.bpmn.Bpmn;
@@ -22,6 +23,9 @@ public class SimpleSpringBootTest {
 
     @Autowired
     private ZeebeClient client;
+
+    @Autowired
+    private InMemoryEngine engine;
 
     private static boolean calledTest1 = false;
 
@@ -48,6 +52,8 @@ public class SimpleSpringBootTest {
         System.out.println("##############################################");
         assertThat(processInstance).isStarted();
         System.out.println("##############################################");
+        // Currently multi-threaded as relying on the @ZeebeWorker opening up
+        // its own worker via the client
         waitForIdleState();
         System.out.println("##############################################");
         assertThat(processInstance).isCompleted();
@@ -60,7 +66,7 @@ public class SimpleSpringBootTest {
     }
 
     // TODO find a better solution for this
-    public static void waitForIdleState() {
+    public void waitForIdleState() {
         try {
             Thread.sleep(500);
         } catch (final InterruptedException e) {

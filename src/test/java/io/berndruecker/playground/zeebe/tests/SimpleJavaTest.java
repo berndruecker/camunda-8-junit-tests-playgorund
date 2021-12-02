@@ -3,7 +3,9 @@ package io.berndruecker.playground.zeebe.tests;
 import io.camunda.zeebe.bpmnassert.extensions.ZeebeProcessTest;
 import io.camunda.zeebe.bpmnassert.testengine.InMemoryEngine;
 import io.camunda.zeebe.client.ZeebeClient;
+import io.camunda.zeebe.client.api.response.ActivateJobsResponse;
 import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
+import io.camunda.zeebe.client.api.worker.JobHandler;
 import io.camunda.zeebe.model.bpmn.Bpmn;
 import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
 import org.junit.jupiter.api.Test;
@@ -25,7 +27,7 @@ public class SimpleJavaTest {
     private static int calledTestMagicNumber;
 
     @Test
-    public void testProcessInstanceIsStarted() {
+    public void testProcessInstanceIsStarted() throws Exception {
         BpmnModelInstance bpmnModel = Bpmn.createExecutableProcess("test1")
                 .startEvent()
                 .serviceTask().zeebeJobType("test1")
@@ -43,23 +45,34 @@ public class SimpleJavaTest {
                 .variables(variables)
                 .send().join();
 
-        client.newWorker().jobType("test1").handler((jobCclient, job) -> {
-            calledTest1 = true;
-            calledTestMagicNumber = (int) job.getVariablesAsMap().get("magicNumber");
-            System.out.println("JIIIIHAAAAAA");
-            jobCclient.newCompleteCommand(job.getKey()).send().join();
-        }).open();
-
         // then
         System.out.println("##############################################");
         assertThat(processInstance).isStarted();
         System.out.println("##############################################");
+
+        assertAndExecuteJob("test1", (jobCclient, job) -> {
+            calledTest1 = true;
+            calledTestMagicNumber = (int) job.getVariablesAsMap().get("magicNumber");
+            System.out.println("JIIIIHAAAAAA");
+            jobCclient.newCompleteCommand(job.getKey()).send().join();
+        });
         engine.waitForIdleState();
-        waitForIdleState();
+        System.out.println("##############################################");
+
+
+//        waitForIdleState();
         System.out.println("##############################################");
         assertThat(processInstance).isCompleted();
         assertTrue(calledTest1);
         assertEquals(42, calledTestMagicNumber);
+    }
+
+    private void assertAndExecuteJob(String taskType, JobHandler handler) throws Exception {
+        ActivateJobsResponse job = this.client.newActivateJobsCommand()
+                .jobType(taskType)
+                .maxJobsToActivate(1)
+                .send().join();
+        handler.handle(client, job.getJobs().get(0));
     }
 
     // TODO find a better solution for this
