@@ -1,6 +1,7 @@
 package io.berndruecker.playground.zeebe.tests.springboot;
 
-import io.camunda.testing.utils.RecordStreamSourceStore;
+import io.camunda.zeebe.bpmnassert.RecordStreamSourceStore;
+import io.camunda.zeebe.bpmnassert.testengine.InMemoryEngine;
 import org.camunda.community.eze.ZeebeEngine;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -12,8 +13,8 @@ public class ZeebeSpringAssertionsExtension implements BeforeEachCallback, After
 
   @Override
   public void beforeEach(final ExtensionContext extensionContext) throws Exception {
-    ZeebeEngine zeebeEngine = SpringExtension.getApplicationContext(extensionContext).getBean(ZeebeEngine.class);
-    RecordStreamSourceStore.init(zeebeEngine);
+    InMemoryEngine zeebeEngine = SpringExtension.getApplicationContext(extensionContext).getBean(InMemoryEngine.class);
+    RecordStreamSourceStore.init(zeebeEngine.getRecordStream());
   }
 
   @Override

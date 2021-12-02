@@ -13,7 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.util.Collections;
 import java.util.Map;
 
-import static io.camunda.testing.assertions.BpmnAssert.assertThat;
+import static io.camunda.zeebe.bpmnassert.assertions.BpmnAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 @SpringBootTest

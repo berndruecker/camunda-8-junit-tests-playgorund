@@ -1,6 +1,5 @@
 package io.berndruecker.playground.zeebe.tests.springboot;
 
-import org.camunda.community.eze.EmbeddedZeebeEngine;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.context.annotation.Import;
 
