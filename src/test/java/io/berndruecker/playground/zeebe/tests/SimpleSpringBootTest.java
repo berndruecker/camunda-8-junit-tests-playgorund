@@ -1,20 +1,23 @@
 package io.berndruecker.playground.zeebe.tests;
 
-import io.berndruecker.playground.zeebe.tests.springboot.ZeebeSpringAssertions;
-import io.camunda.zeebe.bpmnassert.testengine.InMemoryEngine;
 import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
 import io.camunda.zeebe.model.bpmn.Bpmn;
 import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
+import io.camunda.zeebe.process.test.RecordStreamSourceStore;
+import io.camunda.zeebe.process.test.testengine.InMemoryEngine;
 import io.camunda.zeebe.spring.client.annotation.ZeebeWorker;
+import io.camunda.zeebe.spring.client.config.ZeebeSpringAssertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.testcontainers.shaded.org.awaitility.Awaitility;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
 
-import static io.camunda.zeebe.bpmnassert.assertions.BpmnAssert.assertThat;
+import static io.camunda.zeebe.process.test.assertions.BpmnAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 @SpringBootTest
@@ -54,9 +57,11 @@ public class SimpleSpringBootTest {
         System.out.println("##############################################");
         // Currently multi-threaded as relying on the @ZeebeWorker opening up
         // its own worker via the client
-        waitForIdleState();
+        waitForCompletion(processInstance);
         System.out.println("##############################################");
         assertThat(processInstance).isCompleted();
+        assertThat(processInstance).hasVariable("magicNumber");
+        assertThat(processInstance).hasVariableWithValue("magicNumber", 42);
         assertTrue(calledTest1);
     }
 
@@ -66,12 +71,11 @@ public class SimpleSpringBootTest {
     }
 
     // TODO find a better solution for this
-    public void waitForIdleState() {
-        try {
-            Thread.sleep(500);
-        } catch (final InterruptedException e) {
-            e.printStackTrace();
-            throw new IllegalStateException("Sleep was interrupted");
-        }
+    public void waitForCompletion(ProcessInstanceEvent processInstance) {
+        Awaitility.await().atMost(Duration.ofMillis(1000)).untilAsserted(() -> {
+            RecordStreamSourceStore.init(engine.getRecordStream());
+            assertThat(processInstance).isCompleted();
+            Thread.sleep(100L);
+        });
     }
 }

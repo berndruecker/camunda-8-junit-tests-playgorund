@@ -1,19 +1,19 @@
 package io.berndruecker.playground.zeebe.tests;
 
-import io.camunda.zeebe.bpmnassert.extensions.ZeebeProcessTest;
-import io.camunda.zeebe.bpmnassert.testengine.InMemoryEngine;
 import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.api.response.ActivateJobsResponse;
 import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
 import io.camunda.zeebe.client.api.worker.JobHandler;
 import io.camunda.zeebe.model.bpmn.Bpmn;
 import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
+import io.camunda.zeebe.process.test.extensions.ZeebeProcessTest;
+import io.camunda.zeebe.process.test.testengine.InMemoryEngine;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.Map;
 
-import static io.camunda.zeebe.bpmnassert.assertions.BpmnAssert.assertThat;
+import static io.camunda.zeebe.process.test.assertions.BpmnAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -46,9 +46,7 @@ public class SimpleJavaTest {
                 .send().join();
 
         // then
-        System.out.println("##############################################");
         assertThat(processInstance).isStarted();
-        System.out.println("##############################################");
 
         assertAndExecuteJob("test1", (jobCclient, job) -> {
             calledTest1 = true;
@@ -57,11 +55,7 @@ public class SimpleJavaTest {
             jobCclient.newCompleteCommand(job.getKey()).send().join();
         });
         engine.waitForIdleState();
-        System.out.println("##############################################");
 
-
-//        waitForIdleState();
-        System.out.println("##############################################");
         assertThat(processInstance).isCompleted();
         assertTrue(calledTest1);
         assertEquals(42, calledTestMagicNumber);
@@ -73,15 +67,5 @@ public class SimpleJavaTest {
                 .maxJobsToActivate(1)
                 .send().join();
         handler.handle(client, job.getJobs().get(0));
-    }
-
-    // TODO find a better solution for this
-    public static void waitForIdleState() {
-        try {
-            Thread.sleep(500);
-        } catch (final InterruptedException e) {
-            e.printStackTrace();
-            throw new IllegalStateException("Sleep was interrupted");
-        }
     }
 }

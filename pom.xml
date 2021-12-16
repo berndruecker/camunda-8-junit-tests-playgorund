@@ -37,7 +37,7 @@
 		<dependency>
 			<groupId>io.camunda</groupId>
 			<artifactId>spring-zeebe-starter</artifactId>
-			<version>1.2.6</version>
+			<version>1.3.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
@@ -52,8 +52,8 @@
 		</dependency>
 		<dependency>
 			<groupId>io.camunda</groupId>
-			<artifactId>zeebe-bpmn-assert</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<artifactId>spring-zeebe-test</artifactId>
+			<version>1.3.0-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 
