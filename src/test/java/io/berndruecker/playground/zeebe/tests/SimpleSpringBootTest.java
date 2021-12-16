@@ -75,7 +75,7 @@ public class SimpleSpringBootTest {
         Awaitility.await().atMost(Duration.ofMillis(1000)).untilAsserted(() -> {
             RecordStreamSourceStore.init(engine.getRecordStream());
             assertThat(processInstance).isCompleted();
-            Thread.sleep(100L);
+            Thread.sleep(500L);
         });
     }
 }
