@@ -34,19 +34,11 @@ public class SimpleSpringBootTest {
 
     @Test
     public void testProcessInstanceIsStarted() {
-        BpmnModelInstance bpmnModel = Bpmn.createExecutableProcess("test1")
-                .startEvent()
-                .serviceTask().zeebeJobType("test1")
-                .endEvent()
-                .done();
-
-        client.newDeployCommand().addProcessModel(bpmnModel, "test1.bpmn").send().join();
-
-        final Map<String, Object> variables = Collections.singletonMap("magicNumber", 42);
+        final Map<String, Object> variables = Collections.singletonMap("a", 42);
 
         // when
         ProcessInstanceEvent processInstance = client.newCreateInstanceCommand()
-                .bpmnProcessId("test1")
+                .bpmnProcessId("testProcess")
                 .latestVersion()
                 .variables(variables)
                 .send().join();
@@ -59,20 +51,15 @@ public class SimpleSpringBootTest {
         // its own worker via the client
         waitForCompletion(processInstance);
         System.out.println("##############################################");
-        assertThat(processInstance).isCompleted();
-        assertThat(processInstance).hasVariable("magicNumber");
-        assertThat(processInstance).hasVariableWithValue("magicNumber", 42);
-        assertTrue(calledTest1);
-    }
-
-    @ZeebeWorker(type="test1", autoComplete = true)
-    public void handleTest1() {
-        calledTest1 = true;
+        //assertThat(processInstance).isCompleted();
+        assertThat(processInstance).hasVariable("b");
+        assertThat(processInstance).hasVariableWithValue("b", 42);
     }
 
     // TODO find a better solution for this
     public void waitForCompletion(ProcessInstanceEvent processInstance) {
-        Awaitility.await().atMost(Duration.ofMillis(1000)).untilAsserted(() -> {
+        Awaitility.await().atMost(Duration.ofMillis(5000)).untilAsserted(() -> {
+            Thread.sleep(500L);
             RecordStreamSourceStore.init(engine.getRecordStream());
             assertThat(processInstance).isCompleted();
             Thread.sleep(500L);
