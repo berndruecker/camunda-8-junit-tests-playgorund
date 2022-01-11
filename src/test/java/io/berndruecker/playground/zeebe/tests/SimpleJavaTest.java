@@ -30,19 +30,19 @@ public class SimpleJavaTest {
     public void testProcessInstanceIsStarted() throws Exception {
         /*
         In very specific situations you might want to create a model on the fly just for a test case
-        BpmnModelInstance bpmnModel = Bpmn.createExecutableProcess("test1")
+        BpmnModelInstance bpmnModel = Bpmn.createExecutableProcess("testProcess")
                 .startEvent()
-                .serviceTask().zeebeJobType("test1")
+                .serviceTask().zeebeJobType("serviceTaskA")
                 .endEvent()
                 .done();
          */
         // but more often, you simply deploy the model from classpath
-        client.newDeployCommand().addResourceFromClasspath("/test.bpmn").send().join();
+        client.newDeployCommand().addResourceFromClasspath("test.bpmn").send().join();
 
         // when
         final Map<String, Object> variables = Collections.singletonMap("magicNumber", 42);
         ProcessInstanceEvent processInstance = client.newCreateInstanceCommand()
-                .bpmnProcessId("test1")
+                .bpmnProcessId("testProcess")
                 .latestVersion()
                 .variables(variables)
                 .send().join();
@@ -50,7 +50,7 @@ public class SimpleJavaTest {
         // then
         assertThat(processInstance).isStarted();
 
-        assertAndExecuteJob("test1", (jobCclient, job) -> {
+        assertAndExecuteJob("serviceTaskA", (jobCclient, job) -> {
             // TODO: Now we would execute our handler code that delegates to the business logic / service invocation
             // Let's do some wired static variable and non-sense sysout instead :-)
             calledTest1 = true;
