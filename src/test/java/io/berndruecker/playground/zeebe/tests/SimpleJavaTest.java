@@ -28,17 +28,19 @@ public class SimpleJavaTest {
 
     @Test
     public void testProcessInstanceIsStarted() throws Exception {
+        /*
+        In very specific situations you might want to create a model on the fly just for a test case
         BpmnModelInstance bpmnModel = Bpmn.createExecutableProcess("test1")
                 .startEvent()
                 .serviceTask().zeebeJobType("test1")
                 .endEvent()
                 .done();
-
-        client.newDeployCommand().addProcessModel(bpmnModel, "test1.bpmn").send().join();
-
-        final Map<String, Object> variables = Collections.singletonMap("magicNumber", 42);
+         */
+        // but more often, you simply deploy the model from classpath
+        client.newDeployCommand().addResourceFromClasspath("/test.bpmn").send().join();
 
         // when
+        final Map<String, Object> variables = Collections.singletonMap("magicNumber", 42);
         ProcessInstanceEvent processInstance = client.newCreateInstanceCommand()
                 .bpmnProcessId("test1")
                 .latestVersion()
@@ -49,11 +51,14 @@ public class SimpleJavaTest {
         assertThat(processInstance).isStarted();
 
         assertAndExecuteJob("test1", (jobCclient, job) -> {
+            // TODO: Now we would execute our handler code that delegates to the business logic / service invocation
+            // Let's do some wired static variable and non-sense sysout instead :-)
             calledTest1 = true;
             calledTestMagicNumber = (int) job.getVariablesAsMap().get("magicNumber");
             System.out.println("JIIIIHAAAAAA");
             jobCclient.newCompleteCommand(job.getKey()).send().join();
         });
+        // Wait for the workflow engine to complete all asynchronously processed work, so that the assertions below work
         engine.waitForIdleState();
 
         assertThat(processInstance).isCompleted();
