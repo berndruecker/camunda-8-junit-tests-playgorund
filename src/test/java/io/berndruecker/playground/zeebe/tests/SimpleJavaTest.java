@@ -4,18 +4,15 @@ import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.api.response.ActivateJobsResponse;
 import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
 import io.camunda.zeebe.client.api.worker.JobHandler;
-import io.camunda.zeebe.model.bpmn.Bpmn;
-import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
 import io.camunda.zeebe.process.test.extensions.ZeebeProcessTest;
 import io.camunda.zeebe.process.test.testengine.InMemoryEngine;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.util.Collections;
 import java.util.Map;
 
 import static io.camunda.zeebe.process.test.assertions.BpmnAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 @ZeebeProcessTest
 public class SimpleJavaTest {
@@ -42,10 +39,10 @@ public class SimpleJavaTest {
         // when
         final Map<String, Object> variables = Collections.singletonMap("magicNumber", 42);
         ProcessInstanceEvent processInstance = client.newCreateInstanceCommand()
-                .bpmnProcessId("testProcess")
-                .latestVersion()
-                .variables(variables)
-                .send().join();
+                                                     .bpmnProcessId("testProcess")
+                                                     .latestVersion()
+                                                     .variables(variables)
+                                                     .send().join();
 
         // then
         assertThat(processInstance).isStarted();
@@ -68,9 +65,9 @@ public class SimpleJavaTest {
 
     private void assertAndExecuteJob(String taskType, JobHandler handler) throws Exception {
         ActivateJobsResponse job = this.client.newActivateJobsCommand()
-                .jobType(taskType)
-                .maxJobsToActivate(1)
-                .send().join();
+                                              .jobType(taskType)
+                                              .maxJobsToActivate(1)
+                                              .send().join();
         handler.handle(client, job.getJobs().get(0));
     }
 }
