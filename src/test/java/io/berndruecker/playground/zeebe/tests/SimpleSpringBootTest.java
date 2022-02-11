@@ -2,26 +2,20 @@ package io.berndruecker.playground.zeebe.tests;
 
 import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
-import io.camunda.zeebe.model.bpmn.Bpmn;
-import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
-import io.camunda.zeebe.process.test.RecordStreamSourceStore;
 import io.camunda.zeebe.process.test.testengine.InMemoryEngine;
-import io.camunda.zeebe.spring.client.annotation.ZeebeWorker;
-import io.camunda.zeebe.spring.client.config.ZeebeSpringAssertions;
+import io.camunda.zeebe.spring.client.config.ZeebeSpringTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.testcontainers.shaded.org.awaitility.Awaitility;
 
-import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
 
 import static io.camunda.zeebe.process.test.assertions.BpmnAssert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static io.camunda.zeebe.spring.client.config.ZeebeTestThreadSupport.waitForProcessInstanceCompleted;
 
 @SpringBootTest
-@ZeebeSpringAssertions
+@ZeebeSpringTest
 public class SimpleSpringBootTest {
 
     @Autowired
@@ -49,20 +43,12 @@ public class SimpleSpringBootTest {
         System.out.println("##############################################");
         // Currently multi-threaded as relying on the @ZeebeWorker opening up
         // its own worker via the client
-        waitForCompletion(processInstance);
+        //engine.waitForIdleState();
+        waitForProcessInstanceCompleted(processInstance);
         System.out.println("##############################################");
         //assertThat(processInstance).isCompleted();
         assertThat(processInstance).hasVariable("b");
-        assertThat(processInstance).hasVariableWithValue("b", 42);
+        assertThat(processInstance).hasVariableWithValue("b", "42");
     }
 
-    // TODO find a better solution for this
-    public void waitForCompletion(ProcessInstanceEvent processInstance) {
-        Awaitility.await().atMost(Duration.ofMillis(5000)).untilAsserted(() -> {
-            Thread.sleep(500L);
-            RecordStreamSourceStore.init(engine.getRecordStream());
-            assertThat(processInstance).isCompleted();
-            Thread.sleep(500L);
-        });
-    }
 }
