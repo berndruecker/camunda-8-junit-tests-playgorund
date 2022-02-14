@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
+import static io.camunda.zeebe.process.test.assertions.BpmnAssert.assertThat;
 import static io.camunda.zeebe.spring.client.config.ZeebeTestThreadSupport.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
@@ -25,38 +26,29 @@ public class TestTwitterProcess {
     private InMemoryEngine engine;
 
     @MockBean
-    private TwitterService tweetPublicationService;
+    private TwitterService twitterService;
 
     @Test
     //TODO Discuss: @ZeebeTestDeployment(resources = "TwitterDemoProcess.bpmn")
-    public void testHappyPath() throws Exception {
+    public void testTweetApproved() throws Exception {
         TwitterProcessVariables variables = new TwitterProcessVariables()
             .setTweet("Hello world")
             .setApproved(true); // TODO: Add Human Task to the test
 
         ProcessInstanceEvent processInstance = zeebe.newCreateInstanceCommand() //
             .bpmnProcessId("TwitterDemoProcess").latestVersion() //
-            .variables(variables).send().join();
+            .variables(variables) //
+            .send().join();
 
         waitForProcessInstanceCompleted(processInstance);
-        Mockito.verify(tweetPublicationService).tweet("Hello world");
-    }
 
-    @Test
-    public void testDuplicate() throws Exception {
-        // throw exception simulating duplicateM
-        Mockito.doThrow(new DuplicateTweetException("DUPLICATE")).when(tweetPublicationService).tweet(anyString());
+        assertThat(processInstance)
+                .hasPassedElement("end_event_tweet_published")
+                .hasNotPassedElement("end_event_tweet_rejected")
+                .isCompleted();
 
-        TwitterProcessVariables variables = new TwitterProcessVariables()
-                .setTweet("Hello world")
-                .setApproved(true);
-
-        ProcessInstanceEvent processInstance = zeebe.newCreateInstanceCommand() //
-                .bpmnProcessId("TwitterDemoProcess").latestVersion() //
-                .variables(variables).send().join();
-
-        waitForProcessInstanceHasPassedElement(processInstance, "boundary_event_tweet_duplicated");
-        // TODO: Add human task to test case
+        Mockito.verify(twitterService).tweet("Hello world");
+        Mockito.verifyNoMoreInteractions(twitterService);
     }
 
     @Test
@@ -67,12 +59,30 @@ public class TestTwitterProcess {
 
         ProcessInstanceEvent processInstance = zeebe.newCreateInstanceCommand() //
                 .bpmnProcessId("TwitterDemoProcess").latestVersion() //
-                .variables(variables).send().join();
+                .variables(variables) //
+                .send().join();
 
         waitForProcessInstanceCompleted(processInstance);
         waitForProcessInstanceHasPassedElement(processInstance, "end_event_tweet_rejected");
-        Mockito.verify(tweetPublicationService, never()).tweet(anyString());
+        Mockito.verify(twitterService, never()).tweet(anyString());
     }
 
+    @Test
+    public void testDuplicate() throws Exception {
+        // throw exception simulating duplicateM
+        Mockito.doThrow(new DuplicateTweetException("DUPLICATE")).when(twitterService).tweet(anyString());
+
+        TwitterProcessVariables variables = new TwitterProcessVariables()
+                .setTweet("Hello world")
+                .setApproved(true);
+
+        ProcessInstanceEvent processInstance = zeebe.newCreateInstanceCommand() //
+                .bpmnProcessId("TwitterDemoProcess").latestVersion() //
+                .variables(variables) //
+                .send().join();
+
+        waitForProcessInstanceHasPassedElement(processInstance, "boundary_event_tweet_duplicated");
+        // TODO: Add human task to test case
+    }
 
 }
