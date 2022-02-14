@@ -2,8 +2,7 @@ package io.berndruecker.playground.zeebe.tests.twitter;
 
 import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
-import io.camunda.zeebe.process.test.testengine.InMemoryEngine;
-import io.camunda.zeebe.spring.client.config.ZeebeSpringTest;
+import io.camunda.zeebe.spring.test.ZeebeSpringTest;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +10,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import static io.camunda.zeebe.process.test.assertions.BpmnAssert.assertThat;
-import static io.camunda.zeebe.spring.client.config.ZeebeTestThreadSupport.*;
+import static io.camunda.zeebe.spring.test.ZeebeTestThreadSupport.waitForProcessInstanceCompleted;
+import static io.camunda.zeebe.spring.test.ZeebeTestThreadSupport.waitForProcessInstanceHasPassedElement;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 
@@ -22,14 +22,10 @@ public class TestTwitterProcess {
     @Autowired
     private ZeebeClient zeebe;
 
-    @Autowired
-    private InMemoryEngine engine;
-
     @MockBean
     private TwitterService twitterService;
 
     @Test
-    //TODO Discuss: @ZeebeTestDeployment(resources = "TwitterDemoProcess.bpmn")
     public void testTweetApproved() throws Exception {
         TwitterProcessVariables variables = new TwitterProcessVariables()
             .setTweet("Hello world")

@@ -1,9 +1,9 @@
-package io.berndruecker.playground.zeebe.tests;
+package io.berndruecker.playground.zeebe.tests.springboot;
 
 import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
 import io.camunda.zeebe.process.test.testengine.InMemoryEngine;
-import io.camunda.zeebe.spring.client.config.ZeebeSpringTest;
+import io.camunda.zeebe.spring.test.ZeebeSpringTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import static io.camunda.zeebe.process.test.assertions.BpmnAssert.assertThat;
-import static io.camunda.zeebe.spring.client.config.ZeebeTestThreadSupport.waitForProcessInstanceCompleted;
+import static io.camunda.zeebe.spring.test.ZeebeTestThreadSupport.waitForProcessInstanceCompleted;
 
 @SpringBootTest
 @ZeebeSpringTest
