@@ -1,4 +1,4 @@
-package io.berndruecker.playground.zeebe.tests.springboot;
+package io.berndruecker.playground.zeebe.tests;
 
 import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
