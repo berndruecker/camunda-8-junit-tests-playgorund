@@ -11,31 +11,35 @@ public class TwitterProcessVariables {
         return tweet;
     }
 
-    public void setTweet(String tweet) {
+    public TwitterProcessVariables setTweet(String tweet) {
         this.tweet = tweet;
+        return this;
     }
 
     public String getAuthor() {
         return author;
     }
 
-    public void setAuthor(String author) {
+    public TwitterProcessVariables setAuthor(String author) {
         this.author = author;
+        return this;
     }
 
     public String getBoss() {
         return boss;
     }
 
-    public void setBoss(String boss) {
+    public TwitterProcessVariables setBoss(String boss) {
         this.boss = boss;
+        return this;
     }
 
     public boolean isApproved() {
         return approved;
     }
 
-    public void setApproved(boolean approved) {
+    public TwitterProcessVariables setApproved(boolean approved) {
         this.approved = approved;
+        return this;
     }
 }

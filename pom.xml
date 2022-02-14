@@ -41,6 +41,12 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- Required to offer a REST API via Spring Webflux (of course you could use any other framework too) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
+			<version>${spring-boot.version}</version>
+		</dependency>
 	</dependencies>
 
 	<build>

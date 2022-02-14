@@ -4,8 +4,8 @@ package io.berndruecker.playground.zeebe.tests.twitter;
 /**
  * Publish content on Twitter.
  */
-public interface TweetPublicationService {
+public interface TwitterService {
 
-  void tweet(String content);
+  void tweet(String content) throws DuplicateTweetException;
 
 }
