@@ -2,7 +2,7 @@ package io.berndruecker.playground.zeebe.tests;
 
 import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
-import io.camunda.zeebe.process.test.testengine.InMemoryEngine;
+import io.camunda.zeebe.process.test.api.ZeebeTestEngine;
 import io.camunda.zeebe.spring.test.ZeebeSpringTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,7 @@ public class SimpleSpringBootTest {
     private ZeebeClient client;
 
     @Autowired
-    private InMemoryEngine engine;
+    private ZeebeTestEngine engine;
 
     private static boolean calledTest1 = false;
 

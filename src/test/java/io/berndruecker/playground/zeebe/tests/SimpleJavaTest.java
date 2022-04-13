@@ -6,22 +6,23 @@ import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
 import io.camunda.zeebe.client.api.worker.JobHandler;
 import io.camunda.zeebe.model.bpmn.Bpmn;
 import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
-import io.camunda.zeebe.process.test.extensions.ZeebeProcessTest;
-import io.camunda.zeebe.process.test.testengine.InMemoryEngine;
+import io.camunda.zeebe.process.test.api.ZeebeTestEngine;
+import io.camunda.zeebe.process.test.extension.ZeebeProcessTest;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
 
 import static io.camunda.zeebe.process.test.assertions.BpmnAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ZeebeProcessTest
 public class SimpleJavaTest {
 
     private ZeebeClient client;
-    private InMemoryEngine engine;
+    private ZeebeTestEngine engine;
 
     private static boolean calledTest1 = false;
     private static int calledTestMagicNumber;
@@ -59,7 +60,7 @@ public class SimpleJavaTest {
             jobCclient.newCompleteCommand(job.getKey()).send().join();
         });
         // Wait for the workflow engine to complete all asynchronously processed work, so that the assertions below work
-        engine.waitForIdleState();
+        engine.waitForIdleState(Duration.ofSeconds(1));
 
         assertThat(processInstance).isCompleted();
         assertTrue(calledTest1);
